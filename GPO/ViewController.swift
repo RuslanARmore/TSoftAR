@@ -37,19 +37,14 @@ class ViewController: UIViewController {
             return self.passwordTF.text!
         }
     }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Dispose of any resources that can be recreated.
+        print("did some work")
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
-//        DispatchQueue.global(qos: .userInteractive).async {
-//            DispatchQueue.main.async {
-//                self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
-//            }
-        
-  //      }
-        
         
     }
     @objc func dismissKeyboard() {
@@ -82,11 +77,6 @@ class ViewController: UIViewController {
         
         self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
         Alamofire.request("http://codesurvey.r-mobile.pro/api/token", method: .post, parameters: body, headers: headers).responseJSON { (responseObject) in
-            
-
-            
-            
-            
             if responseObject.result.isSuccess {
                 let resJson = JSON(responseObject.result.value!)
                 
@@ -106,7 +96,6 @@ class ViewController: UIViewController {
                     }
                     self.performSegue(withIdentifier: "StartApp", sender: nil)
                 }
-     
             }
             if responseObject.result.isFailure {
                 let error : NSError = responseObject.result.error! as NSError
