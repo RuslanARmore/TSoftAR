@@ -35,7 +35,7 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let headers = [
             "Authorization" : "bearer " + String(describing: UserDefaults.standard.value(forKey: "access_token")!)
         ]
-        Alamofire.request("http://codesurvey.r-mobile.pro/api/survey/", method: .get, headers: headers).responseJSON { (responseObject) in
+        Alamofire.request("http://codesurvey.r-mobile.pro/api/api/survey/", method: .get, headers: headers).responseJSON { (responseObject) in
             if responseObject.result.isSuccess {
                 let resJSON = JSON(responseObject.result.value!)
                 self.addInfoIntoRealm(resJSON)
@@ -56,7 +56,7 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func addInfoIntoRealm(_ json : JSON) {
-        //print(json)
+        print(json)
         for (_,subJson) : (String, JSON) in json {
             print(subJson["title"])
 
