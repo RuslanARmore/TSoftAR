@@ -21,7 +21,7 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
         super.viewDidLoad()
         print(Realm.Configuration.defaultConfiguration.fileURL)
         downloadSurvey()
-        // Do any additional setup after loading the view.
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,8 +30,6 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func downloadSurvey() {
-        
-       // print("\(UserDefaults.standard.value(forKey: "access_token")!)")
         let headers = [
             "Authorization" : "bearer " + String(describing: UserDefaults.standard.value(forKey: "access_token")!)
         ]
@@ -41,12 +39,8 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.addInfoIntoRealm(resJSON)
                 for (_,subJson):(String, JSON) in resJSON {
                     self.surveyTitle.append(subJson["title"].string!)
-                    
-                    
                 }
-                
                 self.myTableView.reloadData()
-                //print("lol")
             }
             if responseObject.result.isFailure{
                 let error = responseObject.result.error as NSError?
@@ -73,11 +67,23 @@ class SurveyViewController: UIViewController, UITableViewDelegate, UITableViewDa
             for (_, subJson2) : (String, JSON) in subJson["questions"] {
                 print(subJson2["title"])
                 print("******")
+                try! realm.write {
+                    let question = Question()
+                    question.id = subJson2["id"].intValue
+                    question.TITLE = subJson2["title"].stringValue
+                    realm.add(question, update: true)
+                }
                 for (_, subAnswersJson) : (String, JSON) in subJson2["answers"] {
                     print("ответ \(subAnswersJson["title"])")
                     print("next question \(subAnswersJson["nextQuestionId"])")
                     print("id \(subAnswersJson["id"])")
-                
+                    try! realm.write {
+                        let answer = Answer()
+                        answer.id = subAnswersJson["id"].intValue
+                        answer.TITLE = subAnswersJson["title"].stringValue
+                        
+                        realm.add(answer, update: true)
+                    }
                 }
             }
         }

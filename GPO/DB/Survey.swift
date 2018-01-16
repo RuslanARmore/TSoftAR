@@ -13,6 +13,7 @@ class Survey: Object {
     @objc dynamic var title = ""
     @objc dynamic var instruction = ""
     
+    
     @objc dynamic var id = 0
     override static func primaryKey() -> String? {
         return "id"

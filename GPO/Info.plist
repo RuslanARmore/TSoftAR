@@ -8,7 +8,7 @@
         <true/>
         <key>NSExceptionDomains</key>
         <dict>
-            <key>codesurvey.azurewebsites.net</key>
+            <key>codesurvey.r-mobile.pro</key>
             <dict>
                 <key>NSExceptionAllowsInsecureHTTPLoads</key>
                 <true/>

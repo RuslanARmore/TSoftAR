@@ -41,7 +41,6 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
         
@@ -54,7 +53,7 @@ class ViewController: UIViewController {
 
         if (isInternetAvailable()) {
             print("good")
-            connectToServer()
+            WebService.logIn(login, password)
             
         } else {
             showNotification("Отсутствует подключение к интернету")
