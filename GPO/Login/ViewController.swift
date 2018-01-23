@@ -54,7 +54,7 @@ class ViewController: UIViewController {
         if (isInternetAvailable()) {
             print("good")
             WebService.logIn(login, password)
-            
+            //connectToServer()
         } else {
             showNotification("Отсутствует подключение к интернету")
         }
