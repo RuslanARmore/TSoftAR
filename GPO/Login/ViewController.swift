@@ -12,8 +12,9 @@ import SwiftyJSON
 import SystemConfiguration
 import MaterialComponents.MaterialSnackbar
 
+
 class ViewController: UIViewController {
-    
+   
     var result : AnyObject!
     let userDefaults = UserDefaults.standard
     let actInd: UIActivityIndicatorView = UIActivityIndicatorView()
@@ -53,7 +54,12 @@ class ViewController: UIViewController {
 
         if (isInternetAvailable()) {
             print("good")
+            self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
             WebService.logIn(login, password)
+            self.actInd.stopAnimating()
+            if let viewWithTag = self.view.viewWithTag(100) {
+                viewWithTag.removeFromSuperview()
+            }
             //connectToServer()
         } else {
             showNotification("Отсутствует подключение к интернету")
