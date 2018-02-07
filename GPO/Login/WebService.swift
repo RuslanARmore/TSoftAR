@@ -8,60 +8,33 @@
 
 import Foundation
 
-
-
-class WebService {
+class WebService  {
  
-
     
-  static func logIn(_ login : String, _ password : String) {
-
-    
-        let bodyData = "grant_type=password&username=\(login)&password=\(password)"
-        var request = URLRequest(url: URL(string: "http://codesurvey.r-mobile.pro/api/token")!)
-    
+    func postMethod(_ url : String,
+                    _ parameters : [String : String],
+                    _ headers : [String : String]) -> Data {
+        
+   
+        var result = Data()
+        var request = URLRequest(url: URL(string: url)!)
         request.httpMethod = "POST"
-        request.addValue("Basic ZGV2OnRlc3Q=", forHTTPHeaderField: "Authorization")
-        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-
+        
+        let bodyData = connectElements(parameters: parameters)
+       
+        for (header , value) in headers {
+            request.addValue(value, forHTTPHeaderField: header)
+            print(value , header)
+        }
+        
         request.httpBody = bodyData.data(using: String.Encoding.utf8)
-    
         URLSession.shared.dataTask(with: request) { (data:Data?, response:URLResponse?, error:Error?) in
-            
             guard let data = data else { return }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options:[])
-                print("lol")
-                print(json)
-                do {
-                    let decoder = JSONDecoder()
-                    let access = try decoder.decode(AccessToken.self, from: data)
-                } catch {
-                        let decoder = JSONDecoder()
-                        let errorPassword = try decoder.decode(ErrorPassword.self, from: data)
-                }
-                
-            } catch {
-                print(error)
-            }
+            result = data
+            print(result)
         }.resume()
-    }
-    
-    struct AccessToken : Decodable {
-        let expires: String
-        let issued: String
-        let access_token: String
-        let expires_in: Int
-        let token_type: String
-        let user_name: String
-            enum CodingKeys : String, CodingKey {
-                case expires = ".expires"
-                case issued = ".issued"
-                case access_token
-                case expires_in
-                case token_type
-                case user_name
-            }
+        print(result)
+        return result
     }
     
     struct ErrorPassword : Decodable {
@@ -69,5 +42,16 @@ class WebService {
         let error_description : String
     }
     
-   
+    func parseJSON<T : Decodable>(_ data : Data,_ strct : T.Type ) {
+        
+    }
+    func connectElements(parameters : [String : String]) -> String {
+        var bodyData = ""
+        for (parameter , lol ) in parameters {
+            let buf = "\(parameter)=\(lol)&"
+            bodyData = bodyData + buf
+        }
+        return String(bodyData.dropLast())
+    }
+    
 }

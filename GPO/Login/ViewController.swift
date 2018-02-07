@@ -13,8 +13,26 @@ import SystemConfiguration
 import MaterialComponents.MaterialSnackbar
 
 
+struct AccessToken : Decodable {
+    let expires: String
+    let issued: String
+    let access_token: String
+    let expires_in: Int
+    let token_type: String
+    let user_name: String
+    enum CodingKeys : String, CodingKey {
+        case expires = ".expires"
+        case issued = ".issued"
+        case access_token
+        case expires_in
+        case token_type
+        case user_name
+    }
+}
+
 class ViewController: UIViewController {
-   
+    var webService = WebService()
+    var parser = JSONParser()
     var result : AnyObject!
     let userDefaults = UserDefaults.standard
     let actInd: UIActivityIndicatorView = UIActivityIndicatorView()
@@ -50,12 +68,28 @@ class ViewController: UIViewController {
         view.endEditing(true)
     }
     
-    @IBAction func loginButtonPressed(_ sender: Any) {
 
+    
+    @IBAction func loginButtonPressed(_ sender: Any) {
+        let url = "http://codesurvey.r-mobile.pro/api/token"
+        let body = [
+            "grant_type" : "password",
+            "username" : login,
+            "password" : password
+        ]
+        let headers = [
+            "Authorization" : "Basic ZGV2OnRlc3Q=",
+            "Content-Type" : "application/x-www-form-urlencoded"
+        ]
+        
         if (isInternetAvailable()) {
             print("good")
             self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
-            WebService.logIn(login, password)
+     
+            let lol = webService.postMethod(url, body, headers)
+            
+            
+            
             self.actInd.stopAnimating()
             if let viewWithTag = self.view.viewWithTag(100) {
                 viewWithTag.removeFromSuperview()
