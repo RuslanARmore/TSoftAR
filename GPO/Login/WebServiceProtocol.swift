@@ -8,6 +8,6 @@
 
 import Foundation
 protocol WebServiceProtocol {
-    func postMethod(_ url : String,_ parameters : [String : String],_ headers : [String : String]) -> Data
-    
+    func postMethod(_ url : String,_ parameters : [String : String],_ headers : [String : String], completionBlock: @escaping (_ response :Data?) -> Void)
+    func getMethod(_ url : String,_ parameters : [String : String], completionBlock: @escaping (_ response : Data?) -> Void)
 }

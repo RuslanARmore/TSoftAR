@@ -30,12 +30,18 @@ struct AccessToken : Decodable {
     }
 }
 
+struct ErrorPassword : Decodable {
+    let error : String
+    let error_description : String
+}
+
 class ViewController: UIViewController {
     var webService = WebService()
     var parser = JSONParser()
     var result : AnyObject!
     let userDefaults = UserDefaults.standard
     let actInd: UIActivityIndicatorView = UIActivityIndicatorView()
+
     
     @IBOutlet weak var passwordTF: UITextField!
     @IBOutlet weak var loginTF: UITextField!
@@ -71,6 +77,7 @@ class ViewController: UIViewController {
 
     
     @IBAction func loginButtonPressed(_ sender: Any) {
+        self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
         let url = "http://codesurvey.r-mobile.pro/api/token"
         let body = [
             "grant_type" : "password",
@@ -83,65 +90,41 @@ class ViewController: UIViewController {
         ]
         
         if (isInternetAvailable()) {
-            print("good")
-            self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
-     
-            let lol = webService.postMethod(url, body, headers)
             
-            
-            
-            self.actInd.stopAnimating()
-            if let viewWithTag = self.view.viewWithTag(100) {
-                viewWithTag.removeFromSuperview()
-            }
-            //connectToServer()
+            webService.postMethod(url, body, headers, completionBlock: { (response) in
+                let decoder = JSONDecoder()
+                do {
+                    let access = try decoder.decode(AccessToken.self, from: response!)
+                    DispatchQueue.main.async {
+                        UserDefaults.standard.set(access.access_token, forKey: "access_token")
+                        if let viewWithTag = self.view.viewWithTag(100) {
+                            viewWithTag.removeFromSuperview()
+                        }
+                        self.performSegue(withIdentifier: "StartApp", sender: nil)
+                    }
+                } catch {
+                    do {
+                        let wrongPassword = try decoder.decode(ErrorPassword.self, from: response!)
+                        DispatchQueue.main.async {
+                            print(wrongPassword.error_description)
+                            self.showNotification("Неверный логин и/или пароль")
+                            self.actInd.stopAnimating()
+                            if let viewWithTag = self.view.viewWithTag(100) {
+                                viewWithTag.removeFromSuperview()
+                            }
+                        }
+                    } catch {
+                        print(error)
+                    }
+                }
+            })
         } else {
             showNotification("Отсутствует подключение к интернету")
         }
-        
-
     }
     
-    func connectToServer() {
-        let body = [
-            "grant_type" : "password",
-            "username" : login,
-            "password" : password
-        ]
-        let headers = [
-            "Authorization" : "Basic ZGV2OnRlc3Q=",
-            "Content-Type" : "application/x-www-form-urlencoded"
-        ]
-        
-        self.showActivityIndicatory(uiView: self.view, actInd: self.actInd)
-        Alamofire.request("http://codesurvey.r-mobile.pro/api/token", method: .post, parameters: body, headers: headers).responseJSON { (responseObject) in
-            if responseObject.result.isSuccess {
-                let resJson = JSON(responseObject.result.value!)
-                
-                if (resJson["error_description"] == "The user name or password is incorrect.") {
-                    self.showNotification("Неверный логин и/или пароль")
-                    self.actInd.stopAnimating()
-                    if let viewWithTag = self.view.viewWithTag(100) {
-                        viewWithTag.removeFromSuperview()
-                    }
-                }
-                if (resJson["access_token"] != JSON.null ) {
-                    
-                    self.userDefaults.setValue(resJson["access_token"].string, forKey: "access_token")
-                    self.actInd.stopAnimating()
-                    if let viewWithTag = self.view.viewWithTag(100) {
-                        viewWithTag.removeFromSuperview()
-                    }
-                    self.performSegue(withIdentifier: "StartApp", sender: nil)
-                }
-            }
-            if responseObject.result.isFailure {
-                let error : NSError = responseObject.result.error! as NSError
-                print(error)
-                self.showNotification("Ошибка подключения")
-            }
-        }
-    }
+
+    @IBOutlet weak var logInButton: UIButton!
     
     func isInternetAvailable() -> Bool
     {
@@ -169,9 +152,6 @@ class ViewController: UIViewController {
         message.text = messageToWrite
         MDCSnackbarManager.show(message)
     }
-    
-    @IBOutlet weak var logInButton: UIButton!
-    
   
     func showActivityIndicatory(uiView: UIView, actInd : UIActivityIndicatorView) {
         let loadingView: UIView = UIView()

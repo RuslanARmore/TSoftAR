@@ -8,15 +8,17 @@
 
 import Foundation
 
-class WebService  {
+class WebService : WebServiceProtocol  {
  
+
     
     func postMethod(_ url : String,
                     _ parameters : [String : String],
-                    _ headers : [String : String]) -> Data {
+                    _ headers : [String : String],
+                    completionBlock: @escaping (_ response : Data?) -> Void)   {
         
    
-        var result = Data()
+      
         var request = URLRequest(url: URL(string: url)!)
         request.httpMethod = "POST"
         
@@ -30,21 +32,26 @@ class WebService  {
         request.httpBody = bodyData.data(using: String.Encoding.utf8)
         URLSession.shared.dataTask(with: request) { (data:Data?, response:URLResponse?, error:Error?) in
             guard let data = data else { return }
-            result = data
-            print(result)
+            let response = data
+            completionBlock(response)
         }.resume()
-        print(result)
-        return result
     }
     
-    struct ErrorPassword : Decodable {
-        let error : String
-        let error_description : String
-    }
-    
-    func parseJSON<T : Decodable>(_ data : Data,_ strct : T.Type ) {
+    func getMethod(_ url : String, _ headers : [String : String], completionBlock: @escaping (_ response : Data?) -> Void) {
+        var request = URLRequest(url: URL(string: url)!)
+        request.httpMethod = "GET"
+        for (header , value) in headers {
+            request.addValue(value, forHTTPHeaderField: header)
+        }
         
+        URLSession.shared.dataTask(with: request) { (data : Data?, response : URLResponse?, error : Error?) in
+            guard let data = data else { return }
+            let response = data
+            completionBlock(response)
+        }.resume()
     }
+    
+    
     func connectElements(parameters : [String : String]) -> String {
         var bodyData = ""
         for (parameter , lol ) in parameters {
